@@ -1,4 +1,5 @@
-class Pipeline:
+class Chainable:
+
     def __init__(self, processor):
         self.processor = processor
 
@@ -6,7 +7,7 @@ class Pipeline:
         return self.processor.process(data)
 
     def __or__(self, other):
-        return Pipeline(ChainedProcessor(self.processor, other.processor))
+        return Chainable(ChainedProcessor(self.processor, other.processor))
 
 
 class ChainedProcessor:
