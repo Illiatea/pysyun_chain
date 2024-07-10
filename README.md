@@ -158,3 +158,112 @@ asyncio.run(main())
 ```
 
 Thus, the `AsyncChainable` class allows you to conveniently create asynchronous data processing pipelines and combine different processors for sequential asynchronous data processing.
+
+# ChainableGroup Class
+
+The `ChainableGroup` class allows you to create parallel data processing pipelines using multiple processors. It provides an efficient way to process large amounts of data by distributing the workload across multiple threads.
+
+## Initialization
+
+To create a `ChainableGroup` object, you can optionally specify the number of threads:
+
+```python
+pipeline = ChainableGroup(num_threads=4)
+```
+
+If `num_threads` is not specified, it will use as many threads as there are items in the input data.
+
+## Methods
+
+### process(data)
+
+The `process` method processes the `data` using the defined pipeline in parallel. It returns the result of the data processing.
+
+```python
+result = pipeline.process(data)
+```
+
+### __or__(other)
+
+The `__or__` method allows you to add processors to the pipeline. You can chain multiple processors using this method.
+
+```python
+pipeline = ChainableGroup(4) | Chainable(Processor1()) | Chainable(Processor2())
+```
+
+## Usage Example
+
+Here's an example of using `ChainableGroup` for parallel processing:
+
+```python
+import time
+from pysyun_chain import Chainable, ChainableGroup
+
+class SquareProcessor:
+    @staticmethod
+    def process(item):
+        time.sleep(0.01)  # Simulate a heavy operation
+        return [item[0] * item[0]]
+
+input_data = list(range(1000))
+pipeline = ChainableGroup(4) | Chainable(SquareProcessor())
+result = pipeline.process(input_data)
+```
+
+This will process the input data using 4 threads, significantly speeding up the operation compared to sequential processing.
+
+# AsyncChainableGroup Class
+
+The `AsyncChainableGroup` class is similar to `ChainableGroup`, but it's designed for asynchronous operations. It allows you to create parallel asynchronous data processing pipelines.
+
+## Initialization
+
+To create an `AsyncChainableGroup` object, you can optionally specify the concurrency level:
+
+```python
+pipeline = AsyncChainableGroup(concurrency=4)
+```
+
+If `concurrency` is not specified, it will process as many items concurrently as there are in the input data.
+
+## Methods
+
+### async process(data)
+
+The `process` method asynchronously processes the `data` using the defined pipeline in parallel. It returns the result of the data processing.
+
+```python
+result = await pipeline.process(data)
+```
+
+### __or__(other)
+
+The `__or__` method allows you to add processors to the pipeline. You can chain multiple processors using this method.
+
+```python
+pipeline = AsyncChainableGroup(4) | AsyncChainable(AsyncProcessor1()) | AsyncChainable(AsyncProcessor2())
+```
+
+## Usage Example
+
+Here's an example of using `AsyncChainableGroup` for parallel asynchronous processing:
+
+```python
+import asyncio
+from pysyun_chain import AsyncChainable, AsyncChainableGroup
+
+class AsyncSquareProcessor:
+    @staticmethod
+    async def process(item):
+        await asyncio.sleep(0.01)  # Simulate an asynchronous operation
+        return [item[0] * item[0]]
+
+async def main():
+    input_data = list(range(1000))
+    pipeline = AsyncChainableGroup(4) | AsyncChainable(AsyncSquareProcessor())
+    result = await pipeline.process(input_data)
+
+asyncio.run(main())
+```
+
+This will process the input data using 4 concurrent tasks, allowing for efficient parallel processing of asynchronous operations.
