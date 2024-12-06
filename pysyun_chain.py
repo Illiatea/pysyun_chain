@@ -36,7 +36,8 @@ class ChainableGroup:
             return list(executor.map(self.process_item, data))
 
     def process_item(self, item):
-        return self.pipeline.process([item])
+        items = item if isinstance(item, list) else [item]
+        return self.pipeline.process(items)
 
     def __or__(self, other):
         if self.pipeline is None:
@@ -85,7 +86,8 @@ class AsyncChainableGroup:
         return await asyncio.gather(*[process_with_semaphore(item) for item in data])
 
     async def process_item(self, item):
-        return await self.pipeline.process([item])
+        items = item if isinstance(item, list) else [item]
+        return await self.pipeline.process(items)
 
     def __or__(self, other):
         if self.pipeline is None:
